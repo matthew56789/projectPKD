@@ -16,8 +16,19 @@ pricetagMediamarkt = texts $ "div" @: [hasClass "price"]
 pricetagNetonnet :: Scraper String [String]
 pricetagNetonnet = texts $ "div" @: [hasClass "price-big"]
 
+fetchPrice :: String -> IO String
+fetchPrice url
+	| isPrefix url "https://www.komplett" = fetchPrice' url pricetagKomplett
+	| isPrefix url "https://www.mediamarkt" = fetchPrice' url pricetagMediamarkt
 
 
+fetchPrice' url scraper = do
+	scraped <- scrapeURL url scraper
+	let Just (x:xs) = scraped in
+		return x
+
+
+--https://www.mediamarkt.se/sv/product/_oneplus-9-128-gb-6-55-smartphone-artic-sky-1333485.html
 -- https://www.komplett.se/product/1181598/mobil-klockor/mobiltelefoner/oneplus-9-pro-8128gb-morning-mist?q=oneplus4
 
 --tagen från labb 4
@@ -26,3 +37,7 @@ isPrefix mainstring substring
 	| substring !! (length substring - 1) /= mainstring !! (length substring - 1) = False
 	| substring !! (length substring - 1) == mainstring !! (length substring - 1) && 
 	isPrefix mainstring (init substring) == True = True
+
+-- removeJustIO :: Maybe a -> a
+-- removeJustIO (Just x) = do
+	-- return x
