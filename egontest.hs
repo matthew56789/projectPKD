@@ -27,6 +27,14 @@ fetchPrice' url scraper = do
 	let Just (x:xs) = scraped in
 		return x
 
+cleanInts "" = ""
+cleanInts (x:xs) 
+	| (x == '0') || (x == '1') || (x == '2') || (x == '3') || (x == '4') || (x == '5') || (x == '6') || (x == '7') || (x == '8') || (x == '9') = x : cleanInts xs
+	| otherwise = cleanInts xs
+
+priceCheck url = do
+	result <- fetchPrice url
+	return ("Price: " ++ (cleanInts result) ++ " kr")
 
 --https://www.mediamarkt.se/sv/product/_oneplus-9-128-gb-6-55-smartphone-artic-sky-1333485.html
 -- https://www.komplett.se/product/1181598/mobil-klockor/mobiltelefoner/oneplus-9-pro-8128gb-morning-mist?q=oneplus4
