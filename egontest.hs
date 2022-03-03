@@ -7,9 +7,6 @@ import Control.Applicative
 pricetagKomplett :: Scraper String [String]
 pricetagKomplett = texts $ "span" @: [hasClass "product-price-now"]
 
-pricetagElgiganten :: Scraper String [String]
-pricetagElgiganten = texts $ "span" @: [hasClass "price"]
-
 pricetagMediamarkt :: Scraper String [String]
 pricetagMediamarkt = texts $ "div" @: [hasClass "price"]
 
@@ -19,14 +16,9 @@ pricetagNetonnet = texts $ "div" @: [hasClass "price-big"]
 pricetagAmazon :: Scraper String [String]
 pricetagAmazon = texts $ "span" @: [hasClass "a-price-whole"]
 
-pricetagInet :: Scraper String [String]
-pricetagInet = texts $ "span" @: [hasClass "price"]
 
 pricetagClasohlson :: Scraper String [String]
 pricetagClasohlson = texts $ "span" @: [hasClass "product__price-value"]
-
-pricetagDustin :: Scraper String [String]
-pricetagDustin = texts $ "span" @: [hasClass "c-price"]
 
 pricetagCdon :: Scraper String [String]
 pricetagCdon = texts $ "span" @: ["id" @= "product-price"]
@@ -35,13 +27,11 @@ pricetagCdon = texts $ "span" @: ["id" @= "product-price"]
 
 fetchPrice :: String -> IO String
 fetchPrice url
-    | isPrefix url "https://www.komplett/" = fetchPrice' url pricetagKomplett
-    | isPrefix url "https://www.mediamarkt/" = fetchPrice' url pricetagMediamarkt
-    | isPrefix url "https://www.amazon/" = fetchPrice' url pricetagAmazon
-    | isPrefix url "https://www.inet/" = fetchPrice' url pricetagInet
-    | isPrefix url "https://www.clasohlson/" = fetchPrice' url pricetagClasohlson
-    | isPrefix url "https://www.elgiganten/" = fetchPrice' url pricetagElgiganten
-    | isPrefix url "https://cdon/" = fetchPrice' url pricetagCdon
+    | isPrefix url "https://www.komplett" = fetchPrice' url pricetagKomplett
+    | isPrefix url "https://www.mediamarkt" = fetchPrice' url pricetagMediamarkt
+    | isPrefix url "https://www.amazon" = fetchPrice' url pricetagAmazon
+    | isPrefix url "https://www.clasohlson" = fetchPrice' url pricetagClasohlson
+    | isPrefix url "https://cdon" = fetchPrice' url pricetagCdon
     | otherwise  = error "Incompatible url"
 
 
@@ -52,7 +42,7 @@ fetchPrice' url scraper = do
 
 cleanInts "" = ""
 cleanInts (x:xs) 
-	| (x == '0') || (x == '1') || (x == '2') || (x == '3') || (x == '4') || (x == '5') || (x == '6') || (x == '7') || (x == '8') || (x == '9') = x : cleanInts xs
+	| (x == '0') || (x == '1') || (x == '2') || (x == '3') || (x == '4') || (x == '5') || (x == '6') || (x == '7') || (x == '8') || (x == '9') || (x == ',') = x : cleanInts xs
 	| otherwise = cleanInts xs
 
 priceCheck url = do
