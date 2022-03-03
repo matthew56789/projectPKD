@@ -55,10 +55,12 @@ searchStringAux mainstring substring position =
 
 main :: IO ()
 main = do
-    lbs <- simpleHttp komplett
+    lbs <- simpleHttp dustin
     let lastModifiedDateTime = fromFooter $ parseTags lbs
     
     putStrLn $ "Price: " ++ CL.unpack lastModifiedDateTime
 
-    where fromFooter = CL.unwords . CL.words . innerText . take 2 . dropWhile (~/= "<span class=product-price-now>")
+    where fromFooter = CL.unwords . CL.words . innerText . take 2 . dropWhile (~/= "<span class=c-price>")
           komplett = "https://www.komplett.se/product/1184627/mobil-klockor/mobiltelefoner/iphone-12-64gb-lila"
+          dustin = "https://www.dustinhome.se/product/5011275245/galaxy-s22-ultra"
+

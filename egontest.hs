@@ -7,19 +7,32 @@ import Control.Applicative
 pricetagKomplett :: Scraper String [String]
 pricetagKomplett = texts $ "span" @: [hasClass "product-price-now"]
 
-pricetagElgiganten :: Scraper String [String]
-pricetagElgiganten = texts $ "div" @: [hasClass "feature__price"]
-
 pricetagMediamarkt :: Scraper String [String]
 pricetagMediamarkt = texts $ "div" @: [hasClass "price"]
 
 pricetagNetonnet :: Scraper String [String]
 pricetagNetonnet = texts $ "div" @: [hasClass "price-big"]
 
+pricetagAmazon :: Scraper String [String]
+pricetagAmazon = texts $ "span" @: [hasClass "a-price-whole"]
+
+
+pricetagClasohlson :: Scraper String [String]
+pricetagClasohlson = texts $ "span" @: [hasClass "product__price-value"]
+
+pricetagCdon :: Scraper String [String]
+pricetagCdon = texts $ "span" @: ["id" @= "product-price"]
+
+
+
 fetchPrice :: String -> IO String
 fetchPrice url
-	| isPrefix url "https://www.komplett" = fetchPrice' url pricetagKomplett
-	| isPrefix url "https://www.mediamarkt" = fetchPrice' url pricetagMediamarkt
+    | isPrefix url "https://www.komplett" = fetchPrice' url pricetagKomplett
+    | isPrefix url "https://www.mediamarkt" = fetchPrice' url pricetagMediamarkt
+    | isPrefix url "https://www.amazon" = fetchPrice' url pricetagAmazon
+    | isPrefix url "https://www.clasohlson" = fetchPrice' url pricetagClasohlson
+    | isPrefix url "https://cdon" = fetchPrice' url pricetagCdon
+    | otherwise  = error "Incompatible url"
 
 
 fetchPrice' url scraper = do
@@ -29,7 +42,7 @@ fetchPrice' url scraper = do
 
 cleanInts "" = ""
 cleanInts (x:xs) 
-	| (x == '0') || (x == '1') || (x == '2') || (x == '3') || (x == '4') || (x == '5') || (x == '6') || (x == '7') || (x == '8') || (x == '9') = x : cleanInts xs
+	| (x == '0') || (x == '1') || (x == '2') || (x == '3') || (x == '4') || (x == '5') || (x == '6') || (x == '7') || (x == '8') || (x == '9') || (x == ',') = x : cleanInts xs
 	| otherwise = cleanInts xs
 
 priceCheck url = do
@@ -41,6 +54,7 @@ priceCheck url = do
 
 --tagen från labb 4
 isPrefix mainstring substring
+	| (length substring) > (length mainstring) = False
 	| substring == "" = True
 	| substring !! (length substring - 1) /= mainstring !! (length substring - 1) = False
 	| substring !! (length substring - 1) == mainstring !! (length substring - 1) && 
