@@ -25,15 +25,25 @@ pricetagInet = texts $ "span" @: [hasClass "price"]
 pricetagClasohlson :: Scraper String [String]
 pricetagClasohlson = texts $ "span" @: [hasClass "product__price-value"]
 
+pricetagDustin :: Scraper String [String]
+pricetagDustin = texts $ "span" @: [hasClass "c-price"]
+
+pricetagCdon :: Scraper String [String]
+pricetagCdon = texts $ "span" @: ["id" @= "product-price"]
+
+
 
 fetchPrice :: String -> IO String
 fetchPrice url
-    | isPrefix url "https://www.komplett" = fetchPrice' url pricetagKomplett
-    | isPrefix url "https://www.mediamarkt" = fetchPrice' url pricetagMediamarkt
-    | isPrefix url "https://www.amazon" = fetchPrice' url pricetagAmazon
-    | isPrefix url "https://www.clasohlson" = fetchPrice' url pricetagClasohlson
-    | isPrefix url "https://www.inet" = fetchPrice' url pricetagInet
+    | isPrefix url "https://www.komplett/" = fetchPrice' url pricetagKomplett
+    | isPrefix url "https://www.mediamarkt/" = fetchPrice' url pricetagMediamarkt
+    | isPrefix url "https://www.amazon/" = fetchPrice' url pricetagAmazon
+    | isPrefix url "https://www.inet/" = fetchPrice' url pricetagInet
+    | isPrefix url "https://www.clasohlson/" = fetchPrice' url pricetagClasohlson
+    | isPrefix url "https://www.elgiganten/" = fetchPrice' url pricetagElgiganten
+    | isPrefix url "https://cdon/" = fetchPrice' url pricetagCdon
     | otherwise  = error "Incompatible url"
+
 
 fetchPrice' url scraper = do
 	scraped <- scrapeURL url scraper
