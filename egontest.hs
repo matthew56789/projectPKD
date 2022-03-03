@@ -16,10 +16,14 @@ pricetagMediamarkt = texts $ "div" @: [hasClass "price"]
 pricetagNetonnet :: Scraper String [String]
 pricetagNetonnet = texts $ "div" @: [hasClass "price-big"]
 
+pricetagDustin :: Scraper String [String]
+pricetagDustin = texts $ "span" @: [hasClass "c-price"]
+
 fetchPrice :: String -> IO String
 fetchPrice url
 	| isPrefix url "https://www.komplett" = fetchPrice' url pricetagKomplett
 	| isPrefix url "https://www.mediamarkt" = fetchPrice' url pricetagMediamarkt
+	| isPrefix url "https://www.dustin" = fetchPrice' url pricetagDustin
 
 
 fetchPrice' url scraper = do
