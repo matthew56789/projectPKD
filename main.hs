@@ -1,16 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 ----------------------------------------------------------------
-import Text.HTML.Scalpel
-    ( scrapeURL, texts, (@:), (@=), hasClass, Scraper )
+
+import Text.HTML.Scalpel ( scrapeURL, texts, (@:), (@=), hasClass, Scraper, URL )
 import Control.Monad ()
 import Control.Applicative ()
 import Test.HUnit ()
 
-------------------------------Types----------------------------------
-type URL = String
-
-----------------------------------------------------------------
 
 pricetagKomplett :: Scraper String [String]
 pricetagKomplett = texts $ "span" @: [hasClass "product-price-now"]
@@ -24,25 +20,41 @@ pricetagAmazon = texts $ "span" @: [hasClass "a-price-whole"]
 pricetagCdon :: Scraper String [String]
 pricetagCdon = texts $ "span" @: ["id" @= "product-price"]
 
-pricetagElectronordic :: Scraper String [String]
-pricetagElectronordic = texts $ "span" @: [hasClass "price"]
-
 pricetagCdonSearch :: Scraper String [String]
 pricetagCdonSearch = texts $ "span" @: [hasClass "p-c__price-consumer"]
 
+pricetagElectronordic :: Scraper String [String]
+pricetagElectronordic = texts $ "span" @: [hasClass "price"]
 
-fetchPrice :: String -> IO String
+
+
+{-
+	fetchPrice url
+	
+	Return: IO String
+	Example:    fetchPrice "https://www.mediamarkt.se/sv/product/_oneplus-9-128-gb-6-55-smartphone-artic-sky-1333485.html"
+					= "6690:-"
+-}
+fetchPrice :: URL -> IO String
 fetchPrice url
     | isPrefix url "https://www.komplett" = fetchPrice' url pricetagKomplett
     | isPrefix url "https://www.mediamarkt" = fetchPrice' url pricetagMediamarkt
     | isPrefix url "https://www.amazon" = fetchPrice' url pricetagAmazon
-    | isPrefix url "https://cdon.se/catalog/search?q=" = fetchPrice' url pricetagCdonSearch
+	| isPrefix url "https://cdon.se/catalog/search?q=" = fetchPrice' url pricetagCdonSearch
     | isPrefix url "https://cdon" = fetchPrice' url pricetagCdon
-    | isPrefix url "https://electronordic" = fetchPrice' url pricetagElectronordic
+	| isPrefix url "https://electronordic" = fetchPrice' url pricetagElectronordic
     | otherwise  = error "Incompatible url"
 
 
-fetchPrice' :: String -> Scraper String [String] -> IO String
+
+{-
+	fetchPrice' url scraper
+
+	Return: IO String
+	Example:    fetchPrice' "https://www.mediamarkt.se/sv/product/_oneplus-9-128-gb-6-55-smartphone-artic-sky-1333485.html" pricetagMediamarkt
+					= "6690:-"
+-}
+fetchPrice' :: URL -> Scraper String [String] -> IO String
 fetchPrice' url scraper = do
         scraped <- scrapeURL url scraper
         if scraped == Just [] then return "" else
@@ -52,16 +64,17 @@ fetchPrice' url scraper = do
 
 {-
 	cleanInts str
-	Delete all characters that are not [1 ... 9], (.) and (,) from a list of characters
+	Delete all characters that are not [1 ... 9], (.) or (,) from a list of characters.
 	Return: a list of characters
 	Example:    cleanInts "12345/w/r/33" = "1234533"
 -}
 cleanInts :: [Char] -> [Char]
 cleanInts "" = ""
-cleanInts (x:xs) 
-    | (x == '0') || (x == '1') || (x == '2') || (x == '3') || (x == '4') || (x == '5') || (x == '6') || (x == '7') || (x == '8') || (x == '9') = x : cleanInts xs
-    | (x == ',') || (x == '.') = ""
-    | otherwise = cleanInts xs
+cleanInts (x:xs)
+	| (x == '0') || (x == '1') || (x == '2') || (x == '3') || (x == '4') || (x == '5') || (x == '6') || (x == '7') || (x == '8') || (x == '9') = x : cleanInts xs
+	| (x == ',') || (x == '.') = ""
+	| otherwise = cleanInts xs
+
 
 
 {-
@@ -77,6 +90,9 @@ priceCheck url = do
         if result == "" then error "Could not find a price" else
                 return ("Price: " ++ cleanInts result ++ " kr")
 
+
+
+
 {-
 	priceCompare productName
 	Search for the price of a product 
@@ -87,40 +103,79 @@ priceCheck url = do
 														ElectroNordic: 7989,00kr
 														CDON: 7990kr
 -}
-priceCompare :: String -> IO ()
-priceCompare str = do
+priceCompare :: [Char] -> IO ()
+priceCompare str = let
+	stringOfPrice "" = "No product found"
+	stringOfPrice price = (cleanInts price) ++ " kr" in do
 
-        komplett <- fetchPrice ("https://www.komplett.se/search?q=" ++ str)
-        putStrLn ("Komplett: " ++ cleanInts komplett ++ "kr")
+	komplett <- fetchPrice ("https://www.komplett.se/search?q=" ++ str)
+	putStrLn ("Komplett: " ++ (stringOfPrice komplett))
+	
+	mediamarkt <- fetchPrice ("https://www.mediamarkt.se/sv/search.html?query=" ++ str)
+	putStrLn ("MediaMarkt: " ++ (stringOfPrice mediamarkt))
+	
+	amazon <- fetchPrice ("https://www.amazon.se/s?k=" ++ str)
+	putStrLn ("Amazon: " ++ (stringOfPrice amazon))
+	
+	electronordic <- fetchPrice ("https://electronordic.se/catalogsearch/result/?q=" ++ str)
+	putStrLn ("ElectroNordic: " ++ (stringOfPrice electronordic))
+	
+	cdon <- fetchPrice ("https://cdon.se/catalog/search?q=" ++ str)
+	putStrLn ("CDON: " ++ (stringOfPrice cdon))
+	
+	let 
+		readCleanList [] = []
+		readCleanList (x:xs)
+			| x == "" = 99999999 : readCleanList xs
+			| otherwise = (read (cleanInts x)::Int) : readCleanList xs
+		
+		nameList = ["Komplett", "MediaMarkt", "Amazon", "ElectroNordic", "CDON"]
+		
+		compList = readCleanList [komplett, mediamarkt, amazon, electronordic, cdon]
+		
+		minEle = elementIndex compList (minimum compList) 0
+		in
+		
+		if (compList !! minEle) /= 99999999 then do
+			putStrLn " "
+			putStrLn ("Lowest price: " ++ nameList !! minEle ++ ": " ++ (show (compList !! minEle)) ++ " kr") 
+		
+		else do
+			putStrLn " "
+			putStrLn "Error: Product could not be found"
+	
 
-        mediamarkt <- fetchPrice ("https://www.mediamarkt.se/sv/search.html?query=" ++ str)
-        putStrLn ("MediaMarkt: " ++ cleanInts mediamarkt ++ "kr")
 
-        amazon <- fetchPrice ("https://www.amazon.se/s?k=" ++ str)
-        putStrLn ("Amazon: " ++ cleanInts amazon ++ "kr")
 
-        electronordic <- fetchPrice ("https://electronordic.se/catalogsearch/result/?q=" ++ str)
-        putStrLn ("ElectroNordic: " ++ cleanInts electronordic ++ "kr")
 
-        cdon <- fetchPrice ("https://cdon.se/catalog/search?q=" ++ str)
-        putStrLn ("CDON: " ++ cleanInts cdon ++ "kr")
+
+
+-- returns the index of the first element in the list equal to ele. If no such element exists, returns -1
+-- uses an accumulator acc, which should be 0 initially
+elementIndex :: (Eq a, Num b) => [a] -> a -> b -> b
+elementIndex [] ele acc = -1
+elementIndex (x:xs) ele acc
+	| x == ele = acc
+	| otherwise = elementIndex xs ele (acc + 1)
+
+
 
 
 {-
-	isPrefix mainstring substring
-	Check if the mainstring is a prefix of substring
+	isPrefix mainString subString
+	Check if the mainString is a prefix of subString
 	Return: Bool
 	Example: 	isPrefix "Hallo World" "Hallo" = True
 	
-	variants: The length of substring
+	variants: The length of subString
 -}
 isPrefix :: String -> String -> Bool
-isPrefix mainstring substring
-        | length substring > length mainstring = False
-        | substring == "" = True
-        | substring !! (length substring - 1) /= mainstring !! (length substring - 1) = False
-        | substring !! (length substring - 1) == mainstring !! (length substring - 1) &&
-        isPrefix mainstring (init substring) = True
+isPrefix mainString subString
+        | length subString > length mainString = False
+        | subString == "" = True
+        | subString !! (length subString - 1) /= mainString !! (length subString - 1) = False
+        | subString !! (length subString - 1) == mainString !! (length subString - 1) &&
+        isPrefix mainString (init subString) = True
         | otherwise = False
 
 
