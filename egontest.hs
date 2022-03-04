@@ -30,7 +30,7 @@ pricetagElectronordic = texts $ "span" @: [hasClass "price"]
 
 {-
 	fetchPrice url
-	
+	Fetch the url and find the price.
 	Return: IO String
 	Example:    fetchPrice "https://www.mediamarkt.se/sv/product/_oneplus-9-128-gb-6-55-smartphone-artic-sky-1333485.html"
 					= "6690:-"
@@ -49,7 +49,7 @@ fetchPrice url
 
 {-
 	fetchPrice' url scraper
-
+	Hjelp funcction for fetchPrice
 	Return: IO String
 	Example:    fetchPrice' "https://www.mediamarkt.se/sv/product/_oneplus-9-128-gb-6-55-smartphone-artic-sky-1333485.html" pricetagMediamarkt
 					= "6690:-"
