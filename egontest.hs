@@ -225,3 +225,20 @@ isPrefix mainString subString
         -- price <- priceCheck "https://www.mediamarkt.se/sv/product/_oneplus-9-128-gb-6-55-smartphone-artic-sky-1333485.html" 
         -- return price)
         -- assertEqual "priceCheck Mediamarkt" ("Price: 6690 kr") price)
+
+
+--test1 :: Test
+--test1 = TestCase (assertEqual "isPrefix str1 str2" True (isPrefix str1 str2))
+--	where str1 = "hejhej"
+--	      str2 = "hej"
+--
+--instance Eq a => Eq (IO a)
+--instance Show a => Show (IO a)
+--
+--
+--test2 :: Test
+--test2 = TestCase (assertEqual "priceCheck str1" "Price: 4490 kr" (priceCheck str1))
+--		where 	str1 = "https://www.mediamarkt.se/sv/product/_samsung-galaxy-s20-fe-4g-128gb-6gb-ram-6-5-smartphone-cloud-navy-1334227.html?utm_source=google&utm_medium=cpc&utm_campaign=bb-shopping-generic&utm_term=&utm_content=1334227&gclid=CjwKCAiAjoeRBhAJEiwAYY3nDIEywV0TAQUhASisPit9Pjwi1bJPTBrbln0pCHzkBDeHxdzR12FVuhoC2pYQAvD_BwE"
+--
+--runtests :: IO Counts
+--runtests = runTestTT $ TestList [test1]
