@@ -1,9 +1,16 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+----------------------------------------------------------------
 import Text.HTML.Scalpel
-import Control.Monad
-import Control.Applicative
-import Test.HUnit
+    ( scrapeURL, texts, (@:), (@=), hasClass, Scraper )
+import Control.Monad ()
+import Control.Applicative ()
+import Test.HUnit ()
+
+------------------------------Types----------------------------------
+type URL = String
+
+----------------------------------------------------------------
 
 pricetagKomplett :: Scraper String [String]
 pricetagKomplett = texts $ "span" @: [hasClass "product-price-now"]
@@ -17,77 +24,138 @@ pricetagAmazon = texts $ "span" @: [hasClass "a-price-whole"]
 pricetagCdon :: Scraper String [String]
 pricetagCdon = texts $ "span" @: ["id" @= "product-price"]
 
+pricetagCdonSearch :: Scraper String [String]
+pricetagCdonSearch = texts $ "span" @: [hasClass "p-c__price-consumer"]
+
 pricetagElectronordic :: Scraper String [String]
 pricetagElectronordic = texts $ "span" @: [hasClass "price"]
 
 
-fetchPrice :: String -> IO String
+{-
+	fetchPrice url
+	
+	Return: IO String
+	Example:    fetchPrice "https://www.mediamarkt.se/sv/product/_oneplus-9-128-gb-6-55-smartphone-artic-sky-1333485.html"
+					= "6690:-"
+-}
+fetchPrice :: URL -> IO String
 fetchPrice url
     | isPrefix url "https://www.komplett" = fetchPrice' url pricetagKomplett
     | isPrefix url "https://www.mediamarkt" = fetchPrice' url pricetagMediamarkt
     | isPrefix url "https://www.amazon" = fetchPrice' url pricetagAmazon
+    | isPrefix url "https://cdon.se/catalog/search?q=" = fetchPrice' url pricetagCdonSearch
     | isPrefix url "https://cdon" = fetchPrice' url pricetagCdon
-	| isPrefix url "https://electronordic" = fetchPrice' url pricetagElectronordic
+    | isPrefix url "https://electronordic" = fetchPrice' url pricetagElectronordic
     | otherwise  = error "Incompatible url"
 
 
+
+{-
+	fetchPrice' url scraper
+
+	Return: IO String
+	Example:    fetchPrice' "https://www.mediamarkt.se/sv/product/_oneplus-9-128-gb-6-55-smartphone-artic-sky-1333485.html" pricetagMediamarkt
+					= "6690:-"
+-}
+fetchPrice' :: URL -> Scraper String [String] -> IO String
 fetchPrice' url scraper = do
-	scraped <- scrapeURL url scraper
-	if scraped == Just [] then return "" else
-		let Just (x:xs) = scraped in
-			return x
+        scraped <- scrapeURL url scraper
+        if scraped == Just [] then return "" else
+                let Just (x:xs) = scraped in
+                        return x
 
 
+{-
+	cleanInts str
+	Delete all characters that are not [1 ... 9], (.) or (,) from a list of characters.
+	Return: a list of characters
+	Example:    cleanInts "12345/w/r/33" = "1234533"
+-}
+cleanInts :: [Char] -> [Char]
 cleanInts "" = ""
 cleanInts (x:xs) 
-	| (x == '0') || (x == '1') || (x == '2') || (x == '3') || (x == '4') || (x == '5') || (x == '6') || (x == '7') || (x == '8') || (x == '9') || (x == ',') || (x == '.') = x : cleanInts xs
-	| otherwise = cleanInts xs
+    | (x == '0') || (x == '1') || (x == '2') || (x == '3') || (x == '4') || (x == '5') || (x == '6') || (x == '7') || (x == '8') || (x == '9') = x : cleanInts xs
+    | (x == ',') || (x == '.') = ""
+    | otherwise = cleanInts xs
 
 
-priceCheck :: String -> IO String
+{-
+	priceCheck url
+	Find the price from an URL link
+	Return: IO String
+	Example:    priceCheck "https://www.mediamarkt.se/sv/product/_oneplus-9-128-gb-6-55-smartphone-artic-sky-1333485.html"
+					= "Price: 6690 kr"
+-}
+priceCheck :: URL -> IO String
 priceCheck url = do
-	result <- fetchPrice url
-	if result == "" then error "Could not find a price" else
-		return ("Price: " ++ (cleanInts result) ++ " kr")
+        result <- fetchPrice url
+        if result == "" then error "Could not find a price" else
+                return ("Price: " ++ cleanInts result ++ " kr")
 
-
+{-
+	priceCompare productName
+	Search for the price of a product 
+	Return: IO ()
+	Example:    priceCompare "iPhone 12 64GB Svart" = 	Komplett: 7990kr
+														MediaMarkt: 7990kr
+														Amazon: 7490,kr
+														ElectroNordic: 7989,00kr
+														CDON: 7990kr
+-}
+priceCompare :: String -> IO ()
 priceCompare str = do
-	
-	komplett <- fetchPrice ("https://www.komplett.se/search?q=" ++ str)
-	putStrLn ("Komplett: " ++ (cleanInts komplett) ++ "kr")
-	
-	mediamarkt <- fetchPrice ("https://www.mediamarkt.se/sv/search.html?query=" ++ str)
-	putStrLn ("MediaMarkt: " ++ (cleanInts mediamarkt) ++ "kr")
-	
-	amazon <- fetchPrice ("https://www.amazon.se/s?k=" ++ str)
-	putStrLn ("Amazon: " ++ (cleanInts amazon) ++ "kr")
-	
-	electronordic <- fetchPrice ("https://electronordic.se/catalogsearch/result/?q=" ++ str)
-	putStrLn ("ElectroNordic: " ++ (cleanInts electronordic) ++ "kr")
-	
-	cdon <- fetchPrice ("https://cdon.se/catalog/search?q=" ++ str)
-	putStrLn ("CDON: " ++ (cleanInts mediamarkt) ++ "kr")
+
+        komplett <- fetchPrice ("https://www.komplett.se/search?q=" ++ str)
+        putStrLn ("Komplett: " ++ cleanInts komplett ++ "kr")
+
+        mediamarkt <- fetchPrice ("https://www.mediamarkt.se/sv/search.html?query=" ++ str)
+        putStrLn ("MediaMarkt: " ++ cleanInts mediamarkt ++ "kr")
+
+        amazon <- fetchPrice ("https://www.amazon.se/s?k=" ++ str)
+        putStrLn ("Amazon: " ++ cleanInts amazon ++ "kr")
+
+        electronordic <- fetchPrice ("https://electronordic.se/catalogsearch/result/?q=" ++ str)
+        putStrLn ("ElectroNordic: " ++ cleanInts electronordic ++ "kr")
+
+        cdon <- fetchPrice ("https://cdon.se/catalog/search?q=" ++ str)
+        putStrLn ("CDON: " ++ cleanInts cdon ++ "kr")
 
 
---tagen från labb 4
-isPrefix mainstring substring
-	| (length substring) > (length mainstring) = False
-	| substring == "" = True
-	| substring !! (length substring - 1) /= mainstring !! (length substring - 1) = False
-	| substring !! (length substring - 1) == mainstring !! (length substring - 1) && 
-	isPrefix mainstring (init substring) == True = True
+{-
+	isPrefix mainString subString
+	Check if the mainString is a prefix of subString
+	Return: Bool
+	Example: 	isPrefix "Hallo World" "Hallo" = True
+	
+	variants: The length of subString
+-}
+isPrefix :: String -> String -> Bool
+isPrefix mainString subString
+        | length subString > length mainString = False
+        | subString == "" = True
+        | subString !! (length subString - 1) /= mainString !! (length subString - 1) = False
+        | subString !! (length subString - 1) == mainString !! (length subString - 1) &&
+        isPrefix mainString (init subString) = True
+        | otherwise = False
+
+
+
+
+
+
+-------------------------------------
 
 -- price1 <- priceCheck "https://www.mediamarkt.se/sv/product/_oneplus-9-128-gb-6-55-smartphone-artic-sky-1333485.html"
 -- testCase1 :: Test
 -- testCase1 =	TestCase $ assertEqual "priceCheck" ("Price: 6690 kr") price1
 
 -- test2 = TestCase (do (x,y) <- partA 3
-	-- assertEqual "for the first result of partA," 5 x
-	-- b <- partB y
-	-- assertBool ("(partB " ++ show y ++ ") failed") b)
+        -- assertEqual "for the first result of partA," 5 x
+        -- b <- partB y
+        -- assertBool ("(partB " ++ show y ++ ") failed") b)
 -- TestCase $ assertEqual "priceCheck" ("Price: 6690 kr") (priceCheck "https://www.mediamarkt.se/sv/product/_oneplus-9-128-gb-6-55-smartphone-artic-sky-1333485.html")
 
 -- testCase1 = TestCase ((do 
-	-- price <- priceCheck "https://www.mediamarkt.se/sv/product/_oneplus-9-128-gb-6-55-smartphone-artic-sky-1333485.html" 
-	-- return price)
-	-- assertEqual "priceCheck Mediamarkt" ("Price: 6690 kr") price)
+        -- price <- priceCheck "https://www.mediamarkt.se/sv/product/_oneplus-9-128-gb-6-55-smartphone-artic-sky-1333485.html" 
+        -- return price)
+        -- assertEqual "priceCheck Mediamarkt" ("Price: 6690 kr") price)
