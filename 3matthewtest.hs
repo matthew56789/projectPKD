@@ -18,29 +18,27 @@ printScrapeResults (Just results) = forM_ results print
 -}
 
 
-main :: String -> IO (Maybe [String])
-main = do
-	url <- getLine
-	let scrapeResults = scrapeURL url pricetag
-  	printScrapeResults scrapeResults
 
-printScrapeResults Nothing = putStrLn "Something went wrong!"
-printScrapeResults (Just []) = putStrLn "Couldn't scrape anything!"
-printScrapeResults (Just results) = forM_ results print
+scrapper :: String -> IO (Maybe [[String]])
+scrapper url = scrapeURL url pricetag
 
---scrapper :: String -> IO (Maybe [String])
---scrapper url = scrapeURL url pricetag
 
-removeJust :: Maybe a -> a
-removeJust (Just x) = x
+pricetag :: Scraper String [[String]]
+pricetag = chroots (AnyTag anySelector) scrapeLink
 
-pricetag :: Scraper String [String]
-pricetag = texts $ "span" @: [hasClass "product-price-now"]
-	--texts $ "div" @: [hasClass "text"] -- $ do
+scrapeLink :: Scraper String [String]
+scrapeLink = fmap (map ("http://www.google.com/" ++)) (attrs "a" "href")
+
+	--chroots ("input" @: ["name" @= "ProductPrice", "type" @= "hidden"]) (attr "value" "=")
+	--chroots ("span" @: [hasClass "c-price"]) (attr "span" )
+--texts $ "div" @: ["id" @= "tradein-price"]
+--	chroots ("div" @: ["id" @= "tradein-price"]) (attr "data-totalprice")
+--	chroots (AnyTag @: [hasClass "price-big", hasClass "text"]) $ do
 --	contents <- text anySelector
---	guard ("p" `isInfixOf` contents)
+--	guard ("2" `isInfixOf` contents)
 --	html anySelector
 
+--
 
 
 
@@ -48,9 +46,8 @@ pricetag = texts $ "span" @: [hasClass "product-price-now"]
 --            guard ("price" `isInfixOf` content)
 --            html anySelector
 
-
---		contents <- anySelector
---		guard ("price" `isInfixOf` contents)
+--		contents <- text anySelector
+--		guard ("cat" `isInfixOf` contents)
 --		html anySelector
 
 
