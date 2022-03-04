@@ -17,6 +17,9 @@ pricetagAmazon = texts $ "span" @: [hasClass "a-price-whole"]
 pricetagCdon :: Scraper String [String]
 pricetagCdon = texts $ "span" @: ["id" @= "product-price"]
 
+pricetagCdonSearch :: Scraper String [String]
+pricetagCdonSearch = texts $ "span" @: [hasClass "p-c__price-consumer"]
+
 pricetagElectronordic :: Scraper String [String]
 pricetagElectronordic = texts $ "span" @: [hasClass "price"]
 
@@ -26,11 +29,12 @@ fetchPrice url
     | isPrefix url "https://www.komplett" = fetchPrice' url pricetagKomplett
     | isPrefix url "https://www.mediamarkt" = fetchPrice' url pricetagMediamarkt
     | isPrefix url "https://www.amazon" = fetchPrice' url pricetagAmazon
+	| isPrefix url "https://cdon.se/catalog/search?q=" = fetchPrice' url pricetagCdonSearch
     | isPrefix url "https://cdon" = fetchPrice' url pricetagCdon
 	| isPrefix url "https://electronordic" = fetchPrice' url pricetagElectronordic
     | otherwise  = error "Incompatible url"
 
-
+fetchPrice' :: String -> Scraper String [String] -> IO String
 fetchPrice' url scraper = do
 	scraped <- scrapeURL url scraper
 	if scraped == Just [] then return "" else
@@ -40,7 +44,8 @@ fetchPrice' url scraper = do
 
 cleanInts "" = ""
 cleanInts (x:xs) 
-	| (x == '0') || (x == '1') || (x == '2') || (x == '3') || (x == '4') || (x == '5') || (x == '6') || (x == '7') || (x == '8') || (x == '9') || (x == ',') || (x == '.') = x : cleanInts xs
+	| (x == '0') || (x == '1') || (x == '2') || (x == '3') || (x == '4') || (x == '5') || (x == '6') || (x == '7') || (x == '8') || (x == '9') = x : cleanInts xs
+	| (x == ',') || (x == '.') = ""
 	| otherwise = cleanInts xs
 
 
@@ -51,22 +56,59 @@ priceCheck url = do
 		return ("Price: " ++ (cleanInts result) ++ " kr")
 
 
-priceCompare str = do
-	
+priceCompare str = let
+	stringOfPrice "" = "No product found"
+	stringOfPrice price = (cleanInts price) ++ " kr" in do
+
 	komplett <- fetchPrice ("https://www.komplett.se/search?q=" ++ str)
-	putStrLn ("Komplett: " ++ (cleanInts komplett) ++ "kr")
+	putStrLn ("Komplett: " ++ (stringOfPrice komplett))
 	
 	mediamarkt <- fetchPrice ("https://www.mediamarkt.se/sv/search.html?query=" ++ str)
-	putStrLn ("MediaMarkt: " ++ (cleanInts mediamarkt) ++ "kr")
+	putStrLn ("MediaMarkt: " ++ (stringOfPrice mediamarkt))
 	
 	amazon <- fetchPrice ("https://www.amazon.se/s?k=" ++ str)
-	putStrLn ("Amazon: " ++ (cleanInts amazon) ++ "kr")
+	putStrLn ("Amazon: " ++ (stringOfPrice amazon))
 	
 	electronordic <- fetchPrice ("https://electronordic.se/catalogsearch/result/?q=" ++ str)
-	putStrLn ("ElectroNordic: " ++ (cleanInts electronordic) ++ "kr")
+	putStrLn ("ElectroNordic: " ++ (stringOfPrice electronordic))
 	
 	cdon <- fetchPrice ("https://cdon.se/catalog/search?q=" ++ str)
-	putStrLn ("CDON: " ++ (cleanInts mediamarkt) ++ "kr")
+	putStrLn ("CDON: " ++ (stringOfPrice cdon))
+	
+	let 
+		readCleanList [] = []
+		readCleanList (x:xs)
+			| x == "" = 99999999 : readCleanList xs
+			| otherwise = (read (cleanInts x)::Int) : readCleanList xs
+		
+		nameList = ["Komplett", "MediaMarkt", "Amazon", "ElectroNordic", "CDON"]
+		
+		compList = readCleanList [komplett, mediamarkt, amazon, electronordic, cdon]
+		
+		minEle = elementIndex compList (minimum compList) 0
+		in
+		
+		if (compList !! minEle) /= 99999999 then do
+			putStrLn " "
+			putStrLn ("Lowest price: " ++ nameList !! minEle ++ ": " ++ (show (compList !! minEle)) ++ " kr") 
+		
+		else do
+			putStrLn " "
+			putStrLn "Error: Product could not be found"
+	
+
+
+
+
+
+
+-- returns the index of the first element in the list equal to ele. If no such element exists, returns -1
+-- uses an accumulator acc, which should be 0 initially
+elementIndex :: (Eq a, Num b) => [a] -> a -> b -> b
+elementIndex [] ele acc = -1
+elementIndex (x:xs) ele acc
+	| x == ele = acc
+	| otherwise = elementIndex xs ele (acc + 1)
 
 
 --tagen från labb 4
