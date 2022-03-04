@@ -2,16 +2,11 @@
 
 ----------------------------------------------------------------
 
-import Text.HTML.Scalpel
-import Control.Monad
-import Control.Applicative
-import Test.HUnit
+import Text.HTML.Scalpel ( scrapeURL, texts, (@:), (@=), hasClass, Scraper, URL )
+import Control.Monad ()
+import Control.Applicative ()
+import Test.HUnit ()
 
-------------------------------Types----------------------------------
-
-type URL = String
-
-----------------------------------------------------------------
 
 pricetagKomplett :: Scraper String [String]
 pricetagKomplett = texts $ "span" @: [hasClass "product-price-now"]
@@ -41,7 +36,6 @@ pricetagElectronordic = texts $ "span" @: [hasClass "price"]
 					= "6690:-"
 -}
 fetchPrice :: URL -> IO String
-fetchPrice :: String -> IO String
 fetchPrice url
     | isPrefix url "https://www.komplett" = fetchPrice' url pricetagKomplett
     | isPrefix url "https://www.mediamarkt" = fetchPrice' url pricetagMediamarkt
@@ -109,6 +103,7 @@ priceCheck url = do
 														ElectroNordic: 7989,00kr
 														CDON: 7990kr
 -}
+priceCompare :: [Char] -> IO ()
 priceCompare str = let
 	stringOfPrice "" = "No product found"
 	stringOfPrice price = (cleanInts price) ++ " kr" in do
