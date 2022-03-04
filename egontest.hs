@@ -14,9 +14,6 @@ pricetagMediamarkt = texts $ "div" @: [hasClass "price"]
 pricetagAmazon :: Scraper String [String]
 pricetagAmazon = texts $ "span" @: [hasClass "a-price-whole"]
 
-pricetagTelefon :: Scraper String [String]
-pricetagTelefon = texts $ "span" @: ["itemprop" @= "price"]
-
 pricetagCdon :: Scraper String [String]
 pricetagCdon = texts $ "span" @: ["id" @= "product-price"]
 
@@ -30,7 +27,6 @@ fetchPrice url
     | isPrefix url "https://www.mediamarkt" = fetchPrice' url pricetagMediamarkt
     | isPrefix url "https://www.amazon" = fetchPrice' url pricetagAmazon
     | isPrefix url "https://cdon" = fetchPrice' url pricetagCdon
-	| isPrefix url "https://www.telefonshoppen" = fetchPrice' url pricetagTelefon
 	| isPrefix url "https://electronordic" = fetchPrice' url pricetagElectronordic
     | otherwise  = error "Incompatible url"
 
