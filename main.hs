@@ -3,8 +3,6 @@
 ----------------------------------------------------------------
 
 import Text.HTML.Scalpel
-import Control.Monad
-import Control.Applicative
 import Test.HUnit
 
 ----------------------------------------------------------------
@@ -179,7 +177,7 @@ cleanIntString (x:xs)
      EXAMPLES: elementIndex [1,2,3,4,5,6] 4 0 == 3
 			   elementIndex [1,2,3,4,5,6] 12 0 == -1
   -}
-elementIndex :: (Eq a, Num b) => [a] -> a -> b -> b
+elementIndex :: (Eq a) => [a] -> a -> Int -> Int
 elementIndex [] ele acc = -1
 elementIndex (x:xs) ele acc
 	| x == ele = acc
