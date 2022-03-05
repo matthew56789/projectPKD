@@ -211,26 +211,24 @@ isPrefix mainString subString
 
 -------------------------------------
 
--- price1 <- priceCheck "https://www.mediamarkt.se/sv/product/_oneplus-9-128-gb-6-55-smartphone-artic-sky-1333485.html"
--- testCase1 :: Test
--- testCase1 =	TestCase $ assertEqual "priceCheck" ("Price: 6690 kr") price1
+test1 :: Test
+test1 = TestCase (assertEqual "isPrefix str1 str2" True (isPrefix str1 str2))
+	where str1 = "hejhej"
+	      str2 = "hej"
 
--- test2 = TestCase (do (x,y) <- partA 3
-        -- assertEqual "for the first result of partA," 5 x
-        -- b <- partB y
-        -- assertBool ("(partB " ++ show y ++ ") failed") b)
--- TestCase $ assertEqual "priceCheck" ("Price: 6690 kr") (priceCheck "https://www.mediamarkt.se/sv/product/_oneplus-9-128-gb-6-55-smartphone-artic-sky-1333485.html")
+test2 :: Test
+test2 = TestCase (assertEqual "cleanIntString lst" "123" (cleanIntString str))
+	where str = "123Hej"
 
--- testCase1 = TestCase ((do 
-        -- price <- priceCheck "https://www.mediamarkt.se/sv/product/_oneplus-9-128-gb-6-55-smartphone-artic-sky-1333485.html" 
-        -- return price)
-        -- assertEqual "priceCheck Mediamarkt" ("Price: 6690 kr") price)
+test3 :: Test
+test3 = TestCase (assertEqual "elementIndex lst 4 0" 3 (elementIndex lst 4 0))
+	where lst = [1,2,3,4,5,6]
 
 
---test1 :: Test
---test1 = TestCase (assertEqual "isPrefix str1 str2" True (isPrefix str1 str2))
---	where str1 = "hejhej"
---	      str2 = "hej"
+
+runtests :: IO Counts
+runtests = runTestTT $ TestList [test1, test2, test3]
+		  
 --
 --instance Eq a => Eq (IO a)
 --instance Show a => Show (IO a)
