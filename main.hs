@@ -208,7 +208,7 @@ isPrefix mainString subString
 
 
 
--------------------------------------
+--------------------------------TestCases------------------------------------------
 
 test1 :: Test
 test1 = TestCase (assertEqual "isPrefix str1 str2" True (isPrefix str1 str2))

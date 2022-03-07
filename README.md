@@ -15,18 +15,4 @@ Web scraper (alt 1)
 	Dela upp arbetet mellan oss tre. andvänder oss  av´någon taskhanterare. 
 
 
-spel (alt 2) 
-
-
-Web scraper (alt 1)
-
-	pricececker that checks the prices of a/many products and compare the prices and keep track of prices which can be stored.
-	maybe a goodlooking ui if we have time otherwise a txt file
-
-	How? 
-	use packages to our advantages 
-	use githubb for convinience
-
-game Snake (alt 2)
-
 
