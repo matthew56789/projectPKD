@@ -215,11 +215,24 @@ test1 = TestCase (assertEqual "isPrefix str1 str2" True (isPrefix str1 str2))
 	      str2 = "hej"
 
 test2 :: Test
-test2 = TestCase (assertEqual "cleanIntString lst" "123" (cleanIntString str))
-	where str = "123Hej"
+test2 = TestCase (assertEqual "isPrefix str1 str2" False (isPrefix str1 str2))
+	where str1 = "hallo"
+	      str2 = "hej"
 
 test3 :: Test
-test3 = TestCase (assertEqual "elementIndex lst 4 0" 3 (elementIndex lst 4 0))
+test3 = TestCase (assertEqual "cleanIntString lst" "123" (cleanIntString str))
+	where str = "123Hej"
+
+test4 :: Test
+test4 = TestCase (assertEqual "cleanIntString lst" "9690" (cleanIntString str))
+	where str = "9\160\&690:-"
+
+test5 :: Test
+test5 = TestCase (assertEqual "elementIndex lst 4 0" 3 (elementIndex lst 4 0))
+	where lst = [1,2,3,4,5,6]
+
+test6 :: Test
+test6 = TestCase (assertEqual "elementIndex lst 9 0" (-1) (elementIndex lst 4 0))
 	where lst = [1,2,3,4,5,6]
 
 
