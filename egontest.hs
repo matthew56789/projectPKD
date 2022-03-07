@@ -239,15 +239,3 @@ test6 = TestCase (assertEqual "elementIndex lst 9 0" (-1) (elementIndex lst 9 0)
 
 runtests :: IO Counts
 runtests = runTestTT $ TestList [test1, test2, test3, test4, test5, test6]
-		  
---
---instance Eq a => Eq (IO a)
---instance Show a => Show (IO a)
---
---
---test2 :: Test
---test2 = TestCase (assertEqual "priceCheck str1" "Price: 4490 kr" (priceCheck str1))
---		where 	str1 = "https://www.mediamarkt.se/sv/product/_samsung-galaxy-s20-fe-4g-128gb-6gb-ram-6-5-smartphone-cloud-navy-1334227.html?utm_source=google&utm_medium=cpc&utm_campaign=bb-shopping-generic&utm_term=&utm_content=1334227&gclid=CjwKCAiAjoeRBhAJEiwAYY3nDIEywV0TAQUhASisPit9Pjwi1bJPTBrbln0pCHzkBDeHxdzR12FVuhoC2pYQAvD_BwE"
---
---runtests :: IO Counts
---runtests = runTestTT $ TestList [test1]
