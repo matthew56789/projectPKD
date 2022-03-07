@@ -232,13 +232,13 @@ test5 = TestCase (assertEqual "elementIndex lst 4 0" 3 (elementIndex lst 4 0))
 	where lst = [1,2,3,4,5,6]
 
 test6 :: Test
-test6 = TestCase (assertEqual "elementIndex lst 9 0" (-1) (elementIndex lst 4 0))
+test6 = TestCase (assertEqual "elementIndex lst 9 0" (-1) (elementIndex lst 9 0))
 	where lst = [1,2,3,4,5,6]
 
 
 
 runtests :: IO Counts
-runtests = runTestTT $ TestList [test1, test2, test3]
+runtests = runTestTT $ TestList [test1, test2, test3, test4, test5, test6]
 		  
 --
 --instance Eq a => Eq (IO a)
