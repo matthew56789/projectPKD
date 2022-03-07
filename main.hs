@@ -27,9 +27,6 @@ pricetagCdonSearch = texts $ "span" @: [hasClass "p-c__price-consumer"]
 pricetagElectronordic :: Scraper String [String]
 pricetagElectronordic = texts $ "span" @: [hasClass "price"]
 
--- pricetagInet = texts ("div" @: [hasClass "box-body"]) // texts ("span" @: [hasClass "price"])
-
-
 
 {-
 	fetchPrice url
