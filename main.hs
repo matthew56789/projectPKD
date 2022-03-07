@@ -215,26 +215,27 @@ test1 = TestCase (assertEqual "isPrefix str1 str2" True (isPrefix str1 str2))
 	      str2 = "hej"
 
 test2 :: Test
-test2 = TestCase (assertEqual "cleanIntString lst" "123" (cleanIntString str))
-	where str = "123Hej"
+test2 = TestCase (assertEqual "isPrefix str1 str2" False (isPrefix str1 str2))
+	where str1 = "hallo"
+	      str2 = "hej"
 
 test3 :: Test
-test3 = TestCase (assertEqual "elementIndex lst 4 0" 3 (elementIndex lst 4 0))
+test3 = TestCase (assertEqual "cleanIntString lst" "123" (cleanIntString str))
+	where str = "123Hej"
+
+test4 :: Test
+test4 = TestCase (assertEqual "cleanIntString lst" "9690" (cleanIntString str))
+	where str = "9\160\&690:-"
+
+test5 :: Test
+test5 = TestCase (assertEqual "elementIndex lst 4 0" 3 (elementIndex lst 4 0))
+	where lst = [1,2,3,4,5,6]
+
+test6 :: Test
+test6 = TestCase (assertEqual "elementIndex lst 9 0" (-1) (elementIndex lst 9 0))
 	where lst = [1,2,3,4,5,6]
 
 
 
 runtests :: IO Counts
-runtests = runTestTT $ TestList [test1, test2, test3]
-		  
---
---instance Eq a => Eq (IO a)
---instance Show a => Show (IO a)
---
---
---test2 :: Test
---test2 = TestCase (assertEqual "priceCheck str1" "Price: 4490 kr" (priceCheck str1))
---		where 	str1 = "https://www.mediamarkt.se/sv/product/_samsung-galaxy-s20-fe-4g-128gb-6gb-ram-6-5-smartphone-cloud-navy-1334227.html?utm_source=google&utm_medium=cpc&utm_campaign=bb-shopping-generic&utm_term=&utm_content=1334227&gclid=CjwKCAiAjoeRBhAJEiwAYY3nDIEywV0TAQUhASisPit9Pjwi1bJPTBrbln0pCHzkBDeHxdzR12FVuhoC2pYQAvD_BwE"
---
---runtests :: IO Counts
---runtests = runTestTT $ TestList [test1]
+runtests = runTestTT $ TestList [test1, test2, test3, test4, test5, test6]
