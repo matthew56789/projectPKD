@@ -25,6 +25,8 @@ pricetagCdonSearch = texts $ "span" @: [hasClass "p-c__price-consumer"]
 pricetagElectronordic :: Scraper String [String]
 pricetagElectronordic = texts $ "span" @: [hasClass "price"]
 
+-- pricetagInet = texts ("div" @: [hasClass "box-body"]) // texts ("span" @: [hasClass "price"])
+
 
 
 {-
@@ -221,8 +223,6 @@ test2 = TestCase (assertEqual "cleanIntString lst" "123" (cleanIntString str))
 test3 :: Test
 test3 = TestCase (assertEqual "elementIndex lst 4 0" 3 (elementIndex lst 4 0))
 	where lst = [1,2,3,4,5,6]
-
-
 
 runtests :: IO Counts
 runtests = runTestTT $ TestList [test1, test2, test3]
