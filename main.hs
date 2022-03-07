@@ -3,7 +3,9 @@
 ----------------------------------------------------------------
 
 import Text.HTML.Scalpel
+    ( scrapeURL, texts, (@:), (@=), hasClass, URL, Scraper )
 import Test.HUnit
+    ( assertEqual, runTestTT, Counts, Test(TestList, TestCase) )
 
 ----------------------------------------------------------------
 
